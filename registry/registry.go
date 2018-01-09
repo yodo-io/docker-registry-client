@@ -8,62 +8,54 @@ import (
 	"strings"
 )
 
+// LogfCallback represents a log callback interface
 type LogfCallback func(format string, args ...interface{})
 
-/*
- * Discard log messages silently.
- */
+// Quiet discards log messages silently.
 func Quiet(format string, args ...interface{}) {
 	/* discard logs */
 }
 
-/*
- * Pass log messages along to Go's "log" module.
- */
+// Log passes log messages along to Go's "log" module.
 func Log(format string, args ...interface{}) {
 	log.Printf(format, args...)
 }
 
+// Registry represents a the docker registry API
 type Registry struct {
 	URL    string
 	Client *http.Client
 	Logf   LogfCallback
 }
 
-/*
- * Create a new Registry with the given URL and credentials, then Ping()s it
- * before returning it to verify that the registry is available.
- *
- * You can, alternately, construct a Registry manually by populating the fields.
- * This passes http.DefaultTransport to WrapTransport when creating the
- * http.Client.
- */
-func New(registryUrl, username, password string) (*Registry, error) {
+// New will create a new Registry with the given URL and credentials, then Ping()s it
+// before returning it to verify that the registry is available.
+//
+// You can, alternately, construct a Registry manually by populating the fields.
+// This passes http.DefaultTransport to WrapTransport when creating the
+// http.Client.
+func New(registryURL, username, password string) (*Registry, error) {
 	transport := http.DefaultTransport
 
-	return newFromTransport(registryUrl, username, password, transport, Log)
+	return newFromTransport(registryURL, username, password, transport, Log)
 }
 
-/*
- * Create a new Registry, as with New, using an http.Transport that disables
- * SSL certificate verification.
- */
-func NewInsecure(registryUrl, username, password string) (*Registry, error) {
+// NewInsecure will create a new Registry, as with New, using an http.Transport that disables
+// SSL certificate verification.
+func NewInsecure(registryURL, username, password string) (*Registry, error) {
 	transport := &http.Transport{
 		TLSClientConfig: &tls.Config{
 			InsecureSkipVerify: true,
 		},
 	}
 
-	return newFromTransport(registryUrl, username, password, transport, Log)
+	return newFromTransport(registryURL, username, password, transport, Log)
 }
 
-/*
- * Given an existing http.RoundTripper such as http.DefaultTransport, build the
- * transport stack necessary to authenticate to the Docker registry API. This
- * adds in support for OAuth bearer tokens and HTTP Basic auth, and sets up
- * error handling this library relies on.
- */
+// WrapTransport will build the transport stack necessary to authenticate to the registry API,
+// wrapping around a given http.RoundTripper such as http.DefaultTransport
+// It adds support for OAuth bearer tokens and HTTP Basic auth, and sets up error handling this
+// library relies on.
 func WrapTransport(transport http.RoundTripper, url, username, password string) http.RoundTripper {
 	tokenTransport := &TokenTransport{
 		Transport: transport,
@@ -82,8 +74,13 @@ func WrapTransport(transport http.RoundTripper, url, username, password string) 
 	return errorTransport
 }
 
-func newFromTransport(registryUrl, username, password string, transport http.RoundTripper, logf LogfCallback) (*Registry, error) {
-	url := strings.TrimSuffix(registryUrl, "/")
+// NewFromTransport will create a new Registry from given transport
+func NewFromTransport(registryURL, username, password string, transport http.RoundTripper) (*Registry, error) {
+	return newFromTransport(registryURL, username, password, transport, Log)
+}
+
+func newFromTransport(registryURL, username, password string, transport http.RoundTripper, logf LogfCallback) (*Registry, error) {
+	url := strings.TrimSuffix(registryURL, "/")
 	transport = WrapTransport(transport, url, username, password)
 	registry := &Registry{
 		URL: url,
@@ -106,6 +103,7 @@ func (r *Registry) url(pathTemplate string, args ...interface{}) string {
 	return url
 }
 
+// Ping the registry
 func (r *Registry) Ping() error {
 	url := r.url("/v2/")
 	r.Logf("registry.ping url=%s", url)
