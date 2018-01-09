@@ -16,21 +16,28 @@
   name = "github.com/opencontainers/go-digest"
   packages = ["."]
   revision = "279bed98673dd5bef374d3b6e4b09e2af76183bf"
-  version = "v1.0.0-rc1"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
   packages = ["."]
-  revision = "3ec0642a7fb6488f65b06f9040adc67e3990296a"
+  revision = "f006c2ac4710855cf0f916dd6b77acf6b048dc6e"
+  version = "v1.0.3"
 
 [[projects]]
+  branch = "master"
+  name = "golang.org/x/crypto"
+  packages = ["ssh/terminal"]
+  revision = "0fcca4842a8d74bfddc2c96a073bd2a4d2a7a2e8"
+
+[[projects]]
+  branch = "master"
   name = "golang.org/x/sys"
-  packages = ["unix"]
-  revision = "8dbc5d05d6edcc104950cc299a1ce6641235bc86"
+  packages = ["unix","windows"]
+  revision = "d38bf781f16e180a1b2ad82697d2f81d7b7ecfac"
 
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "617a0b865fdf1917f43c255e0577be0ccc3b1733f06848cdbf14e209cfb5a5bd"
+  inputs-digest = "4fb5b2cb0b586dc1a5022ff5dece3aeb08c00a88370e1dd1f7f7761bec1b19e0"
   solver-name = "gps-cdcl"
   solver-version = 1
